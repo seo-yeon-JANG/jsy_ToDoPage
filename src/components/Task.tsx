@@ -8,12 +8,22 @@ const Task = ({
 }: {
   boardId: string;
   tasks: Task[];
-  onDeleteTask: (boardId: string, taskId: string) => void;
-  onChangeTaskTitle: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    boardId: string,
-    taskId: string
-  ) => void;
+  onDeleteTask: ({
+    boardId,
+    taskId,
+  }: {
+    boardId: string;
+    taskId: string;
+  }) => void;
+  onChangeTaskTitle: ({
+    title,
+    boardId,
+    taskId,
+  }: {
+    title: string;
+    boardId: string;
+    taskId: string;
+  }) => void;
 }) => {
   return (
     <div className="mt-4 text-white flex-grow">
@@ -22,10 +32,20 @@ const Task = ({
           <li
             key={task.id}
             className="bg-white rounded-lg p-4 text-black flex place-content-between content-center mt-1"
-            onChange={(e) => onChangeTaskTitle(e, boardId, task.id)} // 수정된 부분
           >
-            <input value={task.text} onChange={() => {}} />
-            <Button onClick={() => onDeleteTask(boardId, task.id)}>-</Button>
+            <input
+              value={task.text}
+              onChange={(e) =>
+                onChangeTaskTitle({
+                  title: e.target.value,
+                  boardId,
+                  taskId: task.id,
+                })
+              }
+            />
+            <Button onClick={() => onDeleteTask({ boardId, taskId: task.id })}>
+              -
+            </Button>
           </li>
         ))}
       </ul>

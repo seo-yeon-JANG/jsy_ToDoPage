@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Task from "./Task";
-import BoardTitle from "./common/BoardTitle";
+import BoardTitle from "./BoardTitle";
 import Header from "./common/Header";
 import useBoards from "@/hooks/useBoards";
 
@@ -13,6 +13,7 @@ const Board: React.FC = () => {
     changeBoardTitle,
     addTask,
     deleteTask,
+    changeTaskTitle,
   } = useBoards();
 
   return (
@@ -35,7 +36,7 @@ const Board: React.FC = () => {
               boardId={board.id}
               tasks={board.tasks}
               onDeleteTask={deleteTask}
-              onChangeTaskTitle={changeBoardTitle}
+              onChangeTaskTitle={changeTaskTitle}
             />
             {/* 푸터 */}
             <div

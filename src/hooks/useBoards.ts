@@ -17,9 +17,7 @@ const useBoards = () => {
 
   // boards 상태 변경 시 로컬스토리지에 저장
   useEffect(() => {
-    if (boards.length > 0) {
-      localStorage.setItem("boards", JSON.stringify(boards));
-    }
+    localStorage.setItem("boards", JSON.stringify(boards));
   }, [boards]);
 
   // 보드 추가
@@ -68,7 +66,13 @@ const useBoards = () => {
   };
 
   // Task 삭제
-  const deleteTask = (boardId: string, taskId: string) => {
+  const deleteTask = ({
+    boardId,
+    taskId,
+  }: {
+    boardId: string;
+    taskId: string;
+  }) => {
     setBoards((prevBoards) =>
       prevBoards.map((board) =>
         board.id === boardId
@@ -81,7 +85,15 @@ const useBoards = () => {
     );
   };
   // Task 수정
-  const changeTaskTitle = (title: string, boardId: string, taskId: string) => {
+  const changeTaskTitle = ({
+    title,
+    boardId,
+    taskId,
+  }: {
+    title: string;
+    boardId: string;
+    taskId: string;
+  }) => {
     setBoards((prevBoards) =>
       prevBoards.map((board) =>
         board.id === boardId
