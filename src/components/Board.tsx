@@ -1,41 +1,55 @@
 "use client";
-import { useState, useEffect } from "react";
-import { getStoredData, saveDataToStorage } from "@/utils/storage";
-import { Board as BoardType } from "@/types";
-import Button from "@/components/common/Button";
+import React from "react";
 import Task from "./Task";
+import BoardTitle from "./common/BoardTitle";
+import Header from "./common/Header";
+import useBoards from "@/hooks/useBoards";
 
-const Board = () => {
-  const [boards, setBoards] = useState<BoardType[]>([]);
-
-  const [boardTitle, setBoardTitle] = useState<string>("");
-
-  useEffect(() => {
-    setBoards(getStoredData());
-  }, []);
+const Board: React.FC = () => {
+  const {
+    boards,
+    addBoard,
+    deleteBoard,
+    changeBoardTitle,
+    addTask,
+    deleteTask,
+  } = useBoards();
 
   return (
-    <>
-      {boards.map((board) => (
-        <div key={board.id} className="bg-blue-900 rounded-lg p-4 w-full">
-          {/* 헤더 */}
-          <div className="flex w-full place-content-between">
-            <input
-              className="focus:outline-none bg-transparent text-2xl"
-              value={board.name}
-              onChange={() => {}}
+    <div>
+      <Header onAddBoard={addBoard} />
+      <div className="grid grid-cols-4 gap-5">
+        {boards.map((board) => (
+          <div
+            key={board.id}
+            className="bg-blue-900 rounded-lg p-4 w-full flex flex-col"
+          >
+            <BoardTitle
+              boardId={board.id}
+              boardName={board.name}
+              onTitleChange={changeBoardTitle}
+              onDelete={deleteBoard}
             />
-            <Button>delete</Button>
+            {/* tasks 영역 */}
+            <Task
+              boardId={board.id}
+              tasks={board.tasks}
+              onDeleteTask={deleteTask}
+              onChangeTaskTitle={changeBoardTitle}
+            />
+            {/* 푸터 */}
+            <div
+              className="mt-4 font-bold text-lg"
+              onClick={() => {
+                addTask(board.id);
+              }}
+            >
+              + Add a Card
+            </div>
           </div>
-          {/* tasks 영역 */}
-          <div className="mt-4 text-white">
-            <Task tasks={board.tasks} />
-          </div>
-          {/* 푸터 */}
-          <div className="mt-4 font-bold text-lg">+ Add a Card</div>
-        </div>
-      ))}
-    </>
+        ))}
+      </div>
+    </div>
   );
 };
 

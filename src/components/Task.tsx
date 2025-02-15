@@ -1,22 +1,35 @@
 import Button from "./common/Button";
 import type { Task } from "@/types";
-const Task = ({ tasks }: { tasks: Task[] }) => {
-  console.log(tasks);
+const Task = ({
+  boardId,
+  tasks,
+  onDeleteTask,
+  onChangeTaskTitle,
+}: {
+  boardId: string;
+  tasks: Task[];
+  onDeleteTask: (boardId: string, taskId: string) => void;
+  onChangeTaskTitle: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    boardId: string,
+    taskId: string
+  ) => void;
+}) => {
   return (
-    // 할 일 이동
-    // 할 일 삭제
-    // 할 일 밑줄
-    <ul>
-      {tasks.map((task) => (
-        <li
-          key={task.id}
-          className="bg-white rounded-lg p-4 text-black flex place-content-between content-center mt-1"
-        >
-          <input value={task.text} onChange={() => {}} />
-          <Button>-</Button>
-        </li>
-      ))}
-    </ul>
+    <div className="mt-4 text-white flex-grow">
+      <ul>
+        {tasks.map((task: Task) => (
+          <li
+            key={task.id}
+            className="bg-white rounded-lg p-4 text-black flex place-content-between content-center mt-1"
+            onChange={(e) => onChangeTaskTitle(e, boardId, task.id)} // 수정된 부분
+          >
+            <input value={task.text} onChange={() => {}} />
+            <Button onClick={() => onDeleteTask(boardId, task.id)}>-</Button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 export default Task;
