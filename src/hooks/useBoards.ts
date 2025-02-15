@@ -7,7 +7,6 @@ import uuid from "react-uuid";
 const useBoards = () => {
   const [boards, setBoards] = useState<Board[]>([]);
 
-  // 로컬스토리지에서 boards 데이터를 가져옴
   useEffect(() => {
     const savedBoards = localStorage.getItem("boards");
     if (savedBoards) {
