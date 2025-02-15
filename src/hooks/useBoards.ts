@@ -50,6 +50,11 @@ const useBoards = () => {
     );
   };
 
+  // 보드 순서 변경
+  const reorderBoards = (newBoard: Board[]) => {
+    setBoards(newBoard);
+  };
+
   // Task 추가
   const addTask = (boardId: string) => {
     const newTask: Task = {
@@ -113,6 +118,7 @@ const useBoards = () => {
     addBoard,
     deleteBoard,
     changeBoardTitle,
+    reorderBoards,
     addTask,
     deleteTask,
     changeTaskTitle,
