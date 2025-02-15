@@ -9,3 +9,8 @@ export interface Board {
   name: string;
   tasks: Task[];
 }
+
+export interface DragEndEvent {
+  active: { id: string };
+  over: { id: string };
+}

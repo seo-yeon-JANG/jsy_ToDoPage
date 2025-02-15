@@ -15,9 +15,12 @@ const useBoards = () => {
     }
   }, []);
 
-  // boards 상태 변경 시 로컬스토리지에 저장
   useEffect(() => {
-    localStorage.setItem("boards", JSON.stringify(boards));
+    if (boards.length > 0) {
+      localStorage.setItem("boards", JSON.stringify(boards));
+    } else {
+      localStorage.removeItem("boards");
+    }
   }, [boards]);
 
   // 보드 추가
@@ -113,6 +116,15 @@ const useBoards = () => {
     );
   };
 
+  // task 순서 변경
+  const reorderTasks = (boardId: string, newTasks: Task[]) => {
+    setBoards((prevBoards) =>
+      prevBoards.map((board) =>
+        board.id === boardId ? { ...board, tasks: [...newTasks] } : board
+      )
+    );
+  };
+
   return {
     boards,
     addBoard,
@@ -122,6 +134,7 @@ const useBoards = () => {
     addTask,
     deleteTask,
     changeTaskTitle,
+    reorderTasks,
   };
 };
 

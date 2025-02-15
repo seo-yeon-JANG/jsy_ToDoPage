@@ -1,22 +1,25 @@
 "use client";
 import React from "react";
-import Task from "./Task";
-import BoardTitle from "./BoardTitle";
-import Header from "./common/Header";
-import useBoards from "@/hooks/useBoards";
 import {
   DndContext,
-  closestCenter,
+  PointerSensor,
   useSensor,
   useSensors,
-  PointerSensor,
+  closestCenter,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   rectSortingStrategy,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+
+import useBoards from "@/hooks/useBoards";
 import SortableItem from "./SortableItem";
+import BoardTitle from "./BoardTitle";
+import Header from "./common/Header";
+import Task from "./Task";
+
+import handleDragEnd from "@/utils/handleDragEnd";
 
 const Board: React.FC = () => {
   const {
@@ -27,6 +30,8 @@ const Board: React.FC = () => {
     reorderBoards,
     addTask,
     deleteTask,
+    changeTaskTitle,
+    reorderTasks,
   } = useBoards();
 
   // 드래그 센서 설정
@@ -38,60 +43,54 @@ const Board: React.FC = () => {
     })
   );
 
-  // 드래그 종료 후 처리
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-
-    if (active.id !== over.id) {
-      const oldIndex = boards.findIndex((item) => item.id === active.id);
-      const newIndex = boards.findIndex((item) => item.id === over.id);
-
-      const newOrder = arrayMove(boards, oldIndex, newIndex);
-      reorderBoards(newOrder);
-    }
-  };
-
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
+    <div>
       <Header onAddBoard={addBoard} />
-      <SortableContext items={boards} strategy={rectSortingStrategy}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {boards.map((board) => (
-            <SortableItem key={board.id} id={board.id}>
-              <div
-                className="bg-blue-900 rounded-lg p-4 w-full flex flex-col"
-                style={{
-                  cursor: "grab",
-                }}
-              >
-                <BoardTitle
-                  boardId={board.id}
-                  boardName={board.name}
-                  onTitleChange={changeBoardTitle}
-                  onDelete={deleteBoard}
-                />
-                <Task
-                  boardId={board.id}
-                  tasks={board.tasks}
-                  onDeleteTask={deleteTask}
-                  onChangeTaskTitle={changeBoardTitle}
-                />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(event) =>
+          handleDragEnd(event, { boards, reorderBoards, reorderTasks })
+        }
+      >
+        <SortableContext items={boards} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {boards.map((board) => (
+              <SortableItem key={board.id} id={board.id}>
                 <div
-                  className="mt-4 font-bold text-lg cursor-pointer"
-                  onClick={() => addTask(board.id)}
+                  className="bg-blue-900 rounded-lg p-4 w-full flex flex-col"
+                  style={{ cursor: "grab" }}
                 >
-                  + Add a Card
+                  <BoardTitle
+                    boardId={board.id}
+                    boardName={board.name}
+                    onTitleChange={changeBoardTitle}
+                    onDelete={deleteBoard}
+                  />
+                  <SortableContext
+                    items={board.tasks}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <Task
+                      boardId={board.id}
+                      tasks={board.tasks}
+                      onDeleteTask={deleteTask}
+                      onChangeTaskTitle={changeTaskTitle}
+                    />
+                  </SortableContext>
+                  <div
+                    className="mt-4 font-bold text-lg cursor-pointer"
+                    onClick={() => addTask(board.id)}
+                  >
+                    + Add a Card
+                  </div>
                 </div>
-              </div>
-            </SortableItem>
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+              </SortableItem>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
   );
 };
 
