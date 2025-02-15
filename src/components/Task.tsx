@@ -39,6 +39,7 @@ const Task: React.FC<TaskProps> = ({
           <SortableItem key={task.id} id={task.id}>
             <li className="bg-white rounded-lg p-4 text-black flex place-content-between content-center mt-1">
               <input
+                className="w-full text-ellipsis"
                 value={task.text}
                 onChange={(e) =>
                   onChangeTaskTitle({

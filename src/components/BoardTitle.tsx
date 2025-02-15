@@ -23,7 +23,7 @@ const BoardTitle: React.FC<BoardTitleProps> = ({
   return (
     <div className="flex w-full items-center overflow-hidden">
       <input
-        className="focus:outline-none bg-transparent text-2xl flex-grow w-full"
+        className="focus:outline-none bg-transparent text-2xl flex-grow w-full text-ellipsis"
         value={boardName}
         onChange={(e) => onTitleChange({ boardId, title: e.target.value })}
       />
