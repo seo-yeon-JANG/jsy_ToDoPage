@@ -18,59 +18,17 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import throttle from "lodash.throttle";
-import Header from "../common/Header";
+import Header from "@/components/common/Header";
 import useBoards from "@/hooks/useBoards";
 import BoardItem from "./BoardItem";
-import DragPreview from "../common/DragPreview";
-import type { Board, Task } from "@/types";
+import DragPreview from "@/components/common/DragPreview";
 
-const areArraysEqual = (a: string[], b: string[]): boolean =>
-  a.length === b.length && a.every((el, idx) => el === b[idx]);
-
-const handleBoardDragEnd = (
-  activeId: string,
-  overId: string,
-  boards: Board[],
-  reorderBoards: (newBoards: Board[]) => void
-) => {
-  const activeBoardIndex = boards.findIndex((b) => b.id === activeId);
-  const overBoardIndex = boards.findIndex((b) => b.id === overId);
-  if (activeBoardIndex !== -1 && overBoardIndex !== -1) {
-    const newOrder = arrayMove(boards, activeBoardIndex, overBoardIndex);
-    reorderBoards(newOrder);
+const areArraysEqual = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
   }
-};
-
-const handleTaskDragEnd = (
-  activeId: string,
-  overId: string,
-  boards: Board[],
-  reorderTasks: (boardId: string, newTasks: Task[]) => void
-) => {
-  const fromBoard = boards.find((b) =>
-    b.tasks.some((task) => task.id === activeId)
-  );
-  const toBoard = boards.find(
-    (b) => b.id === overId || b.tasks.some((task) => task.id === overId)
-  );
-  if (!fromBoard || !toBoard) return;
-
-  const fromTasks = [...fromBoard.tasks];
-  const toTasks = [...toBoard.tasks];
-
-  const oldIndex = fromTasks.findIndex((t) => t.id === activeId);
-  let newIndex = toTasks.findIndex((t) => t.id === overId);
-  if (newIndex === -1) newIndex = toTasks.length;
-
-  if (fromBoard.id === toBoard.id) {
-    const reordered = arrayMove(fromTasks, oldIndex, newIndex);
-    reorderTasks(fromBoard.id, reordered);
-  } else {
-    const [movedTask] = fromTasks.splice(oldIndex, 1);
-    reorderTasks(fromBoard.id, fromTasks);
-    toTasks.splice(newIndex, 0, movedTask);
-    reorderTasks(toBoard.id, toTasks);
-  }
+  return true;
 };
 
 const BoardManager: React.FC = () => {
@@ -97,7 +55,11 @@ const BoardManager: React.FC = () => {
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     setActiveId(active.id.toString());
-    setActiveType(boards.find((b) => b.id === active.id) ? "board" : "task");
+    if (boards.find((b) => b.id === active.id)) {
+      setActiveType("board");
+    } else {
+      setActiveType("task");
+    }
   };
 
   const throttledHandleDragOver = useCallback(
@@ -114,51 +76,106 @@ const BoardManager: React.FC = () => {
       );
       if (!fromBoard || !toBoard) return;
 
-      const tasks = [...fromBoard.tasks];
-      const oldIndex = tasks.findIndex((t) => t.id === active.id);
-      let newIndex = tasks.findIndex((t) => t.id === over.id);
-      if (newIndex === -1) newIndex = tasks.length;
+      if (fromBoard.id === toBoard.id) {
+        const tasks = [...fromBoard.tasks];
+        const oldIndex = tasks.findIndex((t) => t.id === active.id);
+        let newIndex = tasks.findIndex((t) => t.id === over.id);
+        if (newIndex === -1) newIndex = tasks.length;
+        if (oldIndex !== newIndex) {
+          const reordered = arrayMove(tasks, oldIndex, newIndex);
+          const newOrder = reordered.map((task) => task.id);
+          const prevOrder =
+            lastTaskOrderRef.current[fromBoard.id] ||
+            fromBoard.tasks.map((task) => task.id);
+          if (!areArraysEqual(newOrder, prevOrder)) {
+            lastTaskOrderRef.current[fromBoard.id] = newOrder;
+            reorderTasks(fromBoard.id, reordered);
+          }
+        }
+      } else {
+        const fromTasks = [...fromBoard.tasks];
+        const toTasks = [...toBoard.tasks];
+        const activeIndex = fromTasks.findIndex((t) => t.id === active.id);
+        if (activeIndex === -1) return;
+        const activeTask = fromTasks[activeIndex];
 
-      if (oldIndex !== newIndex) {
-        const reordered = arrayMove(tasks, oldIndex, newIndex);
-        const newOrder = reordered.map((task) => task.id);
-        const prevOrder =
+        const newFromTasks = fromTasks.filter((t) => t.id !== active.id);
+
+        let newIndex = toTasks.findIndex((t) => t.id === over.id);
+        if (newIndex === -1) newIndex = toTasks.length;
+        const newToTasks = [...toTasks];
+        if (!toTasks.find((t) => t.id === active.id)) {
+          newToTasks.splice(newIndex, 0, activeTask);
+        }
+
+        const prevFromOrder =
           lastTaskOrderRef.current[fromBoard.id] ||
-          fromBoard.tasks.map((task) => task.id);
-        if (!areArraysEqual(newOrder, prevOrder)) {
-          lastTaskOrderRef.current[fromBoard.id] = newOrder;
-          reorderTasks(fromBoard.id, reordered);
+          fromBoard.tasks.map((t) => t.id);
+        const newFromOrder = newFromTasks.map((t) => t.id);
+        if (!areArraysEqual(prevFromOrder, newFromOrder)) {
+          lastTaskOrderRef.current[fromBoard.id] = newFromOrder;
+          reorderTasks(fromBoard.id, newFromTasks);
+        }
+
+        const prevToOrder =
+          lastTaskOrderRef.current[toBoard.id] ||
+          toBoard.tasks.map((t) => t.id);
+        const newToOrder = newToTasks.map((t) => t.id);
+        if (!areArraysEqual(prevToOrder, newToOrder)) {
+          lastTaskOrderRef.current[toBoard.id] = newToOrder;
+          reorderTasks(toBoard.id, newToTasks);
         }
       }
     }, 100),
     [activeType, boards, reorderTasks]
   );
 
-  const handleDragEndWrapper = (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over) return;
+    if (active.id === over.id) return;
 
-    if (activeType === "board") {
-      handleBoardDragEnd(
-        active.id.toString(),
-        over.id.toString(),
-        boards,
-        reorderBoards
-      );
-    } else if (activeType === "task") {
-      handleTaskDragEnd(
-        active.id.toString(),
-        over.id.toString(),
-        boards,
-        reorderTasks
-      );
+    const activeBoardIndex = boards.findIndex((b) => b.id === active.id);
+    const overBoardIndex = boards.findIndex((b) => b.id === over.id);
+    if (activeBoardIndex !== -1 && overBoardIndex !== -1) {
+      const newOrder = arrayMove(boards, activeBoardIndex, overBoardIndex);
+      reorderBoards(newOrder);
+      return;
+    }
+    const fromBoard = boards.find((b) =>
+      b.tasks.some((task) => task.id === active.id)
+    );
+    const toBoard = boards.find(
+      (b) => b.id === over.id || b.tasks.some((task) => task.id === over.id)
+    );
+
+    if (!fromBoard || !toBoard) return;
+    const fromTasks = [...fromBoard.tasks];
+    const toTasks = [...toBoard.tasks];
+
+    const oldIndex = fromTasks.findIndex((t) => t.id === active.id);
+
+    let newIndex = toTasks.findIndex((t) => t.id === over.id);
+    if (newIndex === -1) {
+      newIndex = toTasks.length;
+    }
+
+    if (fromBoard.id === toBoard.id) {
+      const reordered = arrayMove(fromTasks, oldIndex, newIndex);
+      reorderTasks(fromBoard.id, reordered);
+    } else {
+      const [movedTask] = fromTasks.splice(oldIndex, 1);
+      reorderTasks(fromBoard.id, fromTasks);
+
+      toTasks.splice(newIndex, 0, movedTask);
+      reorderTasks(toBoard.id, toTasks);
     }
 
     setActiveId(null);
     setActiveType(null);
   };
 
-  const handleDragCancel = () => {
+  const handleDragCancel = (_event: DragCancelEvent) => {
     setActiveId(null);
     setActiveType(null);
   };
@@ -171,7 +188,7 @@ const BoardManager: React.FC = () => {
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragOver={throttledHandleDragOver}
-        onDragEnd={handleDragEndWrapper}
+        onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
         <SortableContext items={boards} strategy={rectSortingStrategy}>
@@ -189,13 +206,15 @@ const BoardManager: React.FC = () => {
             ))}
           </div>
         </SortableContext>
-        <DragOverlay>
-          <DragPreview
-            activeType={activeType}
-            activeId={activeId}
-            boards={boards}
-          />
-        </DragOverlay>
+        {
+          <DragOverlay>
+            <DragPreview
+              activeType={activeType}
+              activeId={activeId}
+              boards={boards}
+            />
+          </DragOverlay>
+        }
       </DndContext>
     </div>
   );
