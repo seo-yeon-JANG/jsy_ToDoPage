@@ -1,4 +1,4 @@
-import BoardContainer from "@/components/BoardContainer";
+import BoardContainer from "@/components/Board/BoardContainer";
 
 const Page = () => {
   return <BoardContainer />;

@@ -1,6 +1,6 @@
 import React from "react";
 import { Task as TaskType } from "@/types";
-import SortableItem from "./SortableItem";
+import SortableItem from "../common/SortableItem";
 import TaskItem from "./TaskItem";
 
 interface TaskProps {
@@ -30,7 +30,6 @@ const TaskContainer: React.FC<TaskProps> = ({
   onDeleteTask,
   onChangeTaskTitle,
 }) => {
-
   return (
     <div className="mt-4 text-white flex-grow">
       <ul>
@@ -38,11 +37,11 @@ const TaskContainer: React.FC<TaskProps> = ({
           <SortableItem key={task.id} id={task.id}>
             <TaskItem
               value={task.text}
-              onDeleteTask={()=>{
-                onDeleteTask({ boardId, taskId:task.id});
+              onDeleteTask={() => {
+                onDeleteTask({ boardId, taskId: task.id });
               }}
-              onChangeTaskTitle={(title:string) =>{
-                onChangeTaskTitle({title, boardId, taskId:task.id});
+              onChangeTaskTitle={(title: string) => {
+                onChangeTaskTitle({ title, boardId, taskId: task.id });
               }}
             />
           </SortableItem>

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import BoardDragPreview from "./BoardDragPreview";
-import TaskDragPreview from "./TaskDragPreview";
+import BoardDragPreview from "../Board/BoardDragPreview";
+import TaskDragPreview from "../Task/TaskDragPreview";
 import type { Board } from "@/types";
 
 interface DragPreviewProps {
@@ -10,7 +10,11 @@ interface DragPreviewProps {
   boards: Board[];
 }
 
-const DragPreview: React.FC<DragPreviewProps> = ({ activeType, activeId, boards }) => {
+const DragPreview: React.FC<DragPreviewProps> = ({
+  activeType,
+  activeId,
+  boards,
+}) => {
   if (!activeId || !activeType) return null;
 
   if (activeType === "board") {

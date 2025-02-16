@@ -18,10 +18,10 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import throttle from "lodash.throttle";
-import Header from "./common/Header";
+import Header from "../common/Header";
 import useBoards from "@/hooks/useBoards";
 import BoardItem from "./BoardItem";
-import DragPreview from "./DragPreview";
+import DragPreview from "../common/DragPreview";
 import type { Board, Task } from "@/types";
 
 const areArraysEqual = (a: string[], b: string[]): boolean =>
