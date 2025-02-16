@@ -1,7 +1,7 @@
-import Board from "@/components/Board";
+import BoardContainer from "@/components/BoardContainer";
 
 const Page = () => {
-  return <Board />;
+  return <BoardContainer />;
 };
 
 export default Page;
