@@ -1,24 +1,25 @@
+"use client";
 import React from "react";
 import Button from "@/components/common/Button";
 
 interface BoardTitleProps {
   boardId: string;
   boardName: string;
-  onTitleChange: ({
+  onTitleChange?: ({
     boardId,
     title,
   }: {
     boardId: string;
     title: string;
   }) => void;
-  onDelete: (boardId: string) => void;
+  onDelete?: (boardId: string) => void;
 }
 
 const BoardTitle: React.FC<BoardTitleProps> = ({
   boardId,
   boardName,
-  onTitleChange,
-  onDelete,
+  onTitleChange= () =>{},
+  onDelete= () =>{},
 }) => {
   return (
     <div className="flex w-full items-center overflow-hidden">
