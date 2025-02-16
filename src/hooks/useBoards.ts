@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import type { Board } from "@/types";
 import type { Task } from "@/types";
-import uuid from "react-uuid";
+import { v4 as uuid } from "uuid";
 
 const useBoards = () => {
   const [boards, setBoards] = useState<Board[]>([]);

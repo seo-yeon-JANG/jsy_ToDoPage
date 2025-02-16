@@ -1,6 +1,5 @@
 "use client";
 import Button from "@/components/common/Button";
-import uuid from "react-uuid";
 
 const Header = ({ onAddBoard }: { onAddBoard: () => void }) => {
   return (
